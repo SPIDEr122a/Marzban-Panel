@@ -69,7 +69,12 @@ COPY --from=builder /build /code
 RUN pip install --no-cache-dir "setuptools==75.8.0"
 
 COPY start-railway.sh /code/start-railway.sh
-RUN chmod +x /code/start-railway.sh \
+
+# Fix potential Windows (CRLF) line endings that break `set -eo pipefail`
+# under bash (error: "set: pipefail: invalid option name"), regardless of
+# how the file was saved/committed upstream.
+RUN sed -i 's/\r$//' /code/start-railway.sh \
+    && chmod +x /code/start-railway.sh \
     && ln -sf /code/marzban-cli.py /usr/bin/marzban-cli \
     && chmod +x /usr/bin/marzban-cli
 
